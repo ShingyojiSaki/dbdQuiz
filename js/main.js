@@ -1,101 +1,129 @@
 
 const intoroConfigs = {
-    "Easy": {
+    'Easy': {
       id: 1,
       point: 10,
     },
-    "Normal": {
+    'Normal': {
       id: 21,
       point: 20,
     },
-    "Hard": {
+    'Hard': {
       id: 31,
       point: 40,
     },
-    "BerryHard": {
+    'BerryHard': {
       id: 41,
       point: 50,
     },
 };
 const quizConfigs = {
-    "Normal": {
+    'Normal': {
       id: 51,
       point: 10,
     },
-    "Hard": {
+    'Hard': {
       id: 61,
       point: 50,
     },
 };
 const containsConfigs = {
-    "Normal": {
+    'Normal': {
       id: 71,
       point: 10,
     },
+};
+const memberConfigs = {
+    kuromo: 'くろも',
+    death: 'DEATH',
+    runaway: 'runaway',
+    sato: 'さとう',
+    halps: 'ハルピス',
+    rikki: 'りっきー',
+};
+const teamConfigs = {
+    teamA: 'TeamA',
+    teamB: 'TeamB',
 };
 
 window.onload = function(){
 
     createElem();
 
-    const btn = document.querySelector('#btn1');
-    btn.addEventListener('click', function() {
-        const blob = new Blob(['こんにちは'], { "type" : "text/plain" });
+    // const btn = document.querySelector('#btn1');
+    // btn.addEventListener('click', function() {
+    //     const blob = new Blob(['こんにちは'], { 'type' : 'text/plain' });
 
-        btn.href = window.URL.createObjectURL(blob);   
-    })  
+    //     btn.href = window.URL.createObjectURL(blob);   
+    // })  
 };
 
 function createElem(){
-    createTable('#introData',intoroConfigs,7);
-    createTable('#quizData',quizConfigs,7);
-    createTable('#containsData',containsConfigs,3);
+    createTable('#introData',memberConfigs,intoroConfigs,6);
+    createTable('#quizData',memberConfigs,quizConfigs,6);
+    createTable('#containsData',teamConfigs,containsConfigs,2);
 
 }
 
 /**
  * テーブルデータを作成
  */
-function createTable(parentId,config,roop){
+function createTable(parentId,thConfig,config,roop){
     const parentDivElem = document.querySelector(parentId);
+
+    //table要素作成
     const tableElem = document.createElement('table');
     tableElem.setAttribute('border','1');
     const thElem = document.createElement('tr');
-    thElem.innerHTML = `
+    let th = `
                 <td></td>
-                <th>名前A</th>
-                <th>名前B</th>
-                <th>名前C</th>
-                <th>名前D</th>
-                <th>名前E</th>
-                <th>名前F</th>
           `;
+    const keys = Object.keys(thConfig)
+    keys.forEach((key) => th += `<th>${thConfig[key]}</th>`);
+    thElem.innerHTML = th;
     tableElem.appendChild(thElem);
 
     for (const key in config) {
         const trElem = document.createElement('tr');
 
-        let nameTd = `
+        let td = `
                     <th>${key}</th>
               `;
 
         let id = config[key].id;
-        for(let i=1;i<roop;i++){
-            nameTd += `
+        for(let i=1;i<=roop;i++){
+            td += `
                     <td>
-                        <div class="p-qty js-qty">
-                            <div class="__arrow __up js-qty_up"></div>
-                            <div class="__arrow __down js-qty_down"></div>
-                            <input id="${id}" type="number" class="p-qty__input js-qty_target" value="0">
+                        <div class='p-qty js-qty'>
+                            <div class='__arrow __up js-qty_up'></div>
+                            <div class='__arrow __down js-qty_down'></div>
+                            <input id='${id}' type='number' class='p-qty__input js-qty_target' parentid='${parentId}' value='0'>
                         </div>
-                        <span id="point${id}" point="${config[key].point}">0pt</span>
+                        <span id='point${id}' class='point${i}' point='${config[key].point}'>0</span>pt
                     </td>
             `;
             id++;
         }
-        trElem.innerHTML = nameTd;
+        trElem.innerHTML = td;
         tableElem.appendChild(trElem);
     }
+
+    const trElem = document.createElement('tr');
+    
+    let td = `
+                <th>合計</th>
+          `;
+    
+    for(let i=1;i<=roop;i++){
+      td += `
+              <td>
+                <span id='totalpoint${i}'>0</span>pt
+              </td>
+            `;
+    }
+    trElem.innerHTML = td;
+    tableElem.appendChild(trElem);
+
     parentDivElem.appendChild(tableElem);
 }
 
@@ -142,7 +170,19 @@ document.addEventListener('click',function(e){
       //ポイント小計を更新
       const pointElem = document.querySelector(`#point${input[i].id}`);
       const point = pointElem.getAttribute('point');
-      pointElem.textContent = `${input[i].value * point}pt`;
+      pointElem.textContent = `${input[i].value * point}`;
+
+      //ポイント合計を更新
+      const parentElem = document.querySelector(`${input[i].getAttribute('parentid')}`);
+      const totalElem = parentElem.querySelector(`#total${pointElem.getAttribute('class')}`);
+      const pointElems = parentElem.querySelectorAll(`.${pointElem.getAttribute('class')}`);
+
+      let total = 0;
+      for (const ele of pointElems) {
+        console.log(ele);
+        total += parseInt(ele.textContent);
+      }
+      totalElem.textContent = total;
     }
   }
  
