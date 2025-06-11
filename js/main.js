@@ -33,13 +33,19 @@ const containsConfigs = {
       point: 10,
     },
 };
+const totalConfigs = {
+    'Total': {
+      id: 81,
+      point: 0,
+    },
+};
 const memberConfigs = {
     kuromo: 'くろも',
     death: 'DEATH',
     runaway: 'runaway',
     sato: 'さとう',
     halps: 'ハルピス',
-    rikki: 'りっきー',
+    yuria: 'ゆりあ',
 };
 const teamConfigs = {
     teamA: 'TeamA',
@@ -62,6 +68,7 @@ function createElem(){
     createTable('#introData',memberConfigs,intoroConfigs,6);
     createTable('#quizData',memberConfigs,quizConfigs,6);
     createTable('#containsData',teamConfigs,containsConfigs,2);
+    createTable('#totalData',memberConfigs,totalConfigs,6);
 
 }
 
@@ -79,33 +86,46 @@ function createTable(parentId,thConfig,config,roop){
                 <td></td>
           `;
     const keys = Object.keys(thConfig)
-    keys.forEach((key) => th += `<th>${thConfig[key]}</th>`);
+    // keys.forEach((key) =>
+    let index = 1; 
+    for(const key of keys){
+      if(index % 2 == 1){
+        //奇数=teamA
+        th += `<th style='background-color: aliceblue;'>${thConfig[key]}</th>`;
+      }else {
+        //遇数=teamB
+        th += `<th style='background-color: linen;'>${thConfig[key]}</th>`;
+      }
+      index++;
+    }
     thElem.innerHTML = th;
     tableElem.appendChild(thElem);
 
-    for (const key in config) {
-        const trElem = document.createElement('tr');
+    if(parentId !== '#totalData'){
+      for (const key in config) {
+          const trElem = document.createElement('tr');
 
-        let td = `
-                    <th>${key}</th>
+          let td = `
+                      <th>${key}</th>
+                `;
+
+          let id = config[key].id;
+          for(let i=1;i<=roop;i++){
+              td += `
+                      <td>
+                          <div class='p-qty js-qty'>
+                              <div class='__arrow __up js-qty_up'></div>
+                              <div class='__arrow __down js-qty_down'></div>
+                              <input id='${id}' type='number' class='p-qty__input js-qty_target' parentid='${parentId}' value='0'>
+                          </div>
+                          <span id='point${id}' class='point${i}' point='${config[key].point}'>0</span>pt
+                      </td>
               `;
-
-        let id = config[key].id;
-        for(let i=1;i<=roop;i++){
-            td += `
-                    <td>
-                        <div class='p-qty js-qty'>
-                            <div class='__arrow __up js-qty_up'></div>
-                            <div class='__arrow __down js-qty_down'></div>
-                            <input id='${id}' type='number' class='p-qty__input js-qty_target' parentid='${parentId}' value='0'>
-                        </div>
-                        <span id='point${id}' class='point${i}' point='${config[key].point}'>0</span>pt
-                    </td>
-            `;
-            id++;
-        }
-        trElem.innerHTML = td;
-        tableElem.appendChild(trElem);
+              id++;
+          }
+          trElem.innerHTML = td;
+          tableElem.appendChild(trElem);
+      }
     }
 
     const trElem = document.createElement('tr');
@@ -115,11 +135,19 @@ function createTable(parentId,thConfig,config,roop){
           `;
     
     for(let i=1;i<=roop;i++){
-      td += `
-              <td>
-                <span id='totalpoint${i}'>0</span>pt
-              </td>
-            `;
+      if(parentId !== '#totalData') {
+        td += `
+                <td>
+                  <div class='total'><span id='totalpoint${i}' parentid='${parentId}'>0</span>pt</div>
+                </td>
+              `;
+      } else {
+        td += `
+                <td>
+                  <div class='total'><span id='alltotalpoint${i}'>0</span>pt</div>
+                </td>
+              `;
+      }
     }
     trElem.innerHTML = td;
     tableElem.appendChild(trElem);
@@ -179,10 +207,34 @@ document.addEventListener('click',function(e){
 
       let total = 0;
       for (const ele of pointElems) {
-        console.log(ele);
         total += parseInt(ele.textContent);
       }
       totalElem.textContent = total;
+
+      //全体集計を更新
+      const allTotalTableElem = document.querySelector(`#totalData`);
+      const containsDataElem = document.querySelector(`#containsData`);
+      for(let index = 1; index <=6; index++){
+        //各テーブルの小計を取得
+        const tableTotalElems = document.querySelectorAll(`#totalpoint${index}`);
+        let allTotal = 0;
+        for (const ele of tableTotalElems) {
+          //チーム戦以外の合計値を取得
+          if(ele.getAttribute('parentid') !== '#containsData') allTotal += parseInt(ele.textContent);
+        }
+        const memberTotal = allTotalTableElem.querySelector(`#alltotalpoint${index}`);
+        //チーム戦分のポイントを足しこむ
+        if(index % 2 == 1){
+          //奇数=teamA
+          const team = containsDataElem.querySelector('#totalpoint1');
+            allTotal += parseInt(team.textContent);
+        }else{
+          //遇数=teamB
+          const team = containsDataElem.querySelector('#totalpoint2');
+          allTotal += parseInt(team.textContent);
+        }
+        memberTotal.textContent = allTotal;
+      }
     }
   }
  

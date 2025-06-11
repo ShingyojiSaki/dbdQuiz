@@ -49,3 +49,16 @@ input[type="number"] {
   border-radius: 5px;
   padding-left: 25px;
 }
+
+th {
+  width: 140px;
+}
+
+td {
+  width: 140px;
+}
+
+.total {
+  font-weight: bold;
+  text-align: center;
+}
